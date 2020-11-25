@@ -78,7 +78,9 @@ public class MorpheusDSL extends TruffleLanguage<Context> {
             @Override
             public Object execute(VirtualFrame frame) {
                 Object[] arguments = frame.getArguments();
+                System.out.println("JAVA - In Parse");
                 NormalizedMatrix nm = new NormalizedMatrix();
+                System.out.println("JAVA - Ret from Parse");
                 return nm;
             }
         };

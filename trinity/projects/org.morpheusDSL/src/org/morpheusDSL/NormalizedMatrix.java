@@ -65,6 +65,7 @@ public final class NormalizedMatrix implements TruffleObject {
     public Object S = 1;
     public Object K = 2;
     public Object R = 3;
+    public Object adapter = null;
     public Object rowSumS = null;
     public Object[] rowSumRs = null;
     public Object[] Ks = null;
@@ -91,9 +92,10 @@ public final class NormalizedMatrix implements TruffleObject {
         static final protected String columnSum = "columnSum";
         static final protected String elementWiseSum = "elementWiseSum";
 
-        @Specialization(guards = {"member.equals(build)", "arguments.length == 4"})
+        @Specialization(guards = {"member.equals(build)", "arguments.length == 5"})
         static Object doBuild(NormalizedMatrix receiver, String member, Object[] arguments, @Cached BuildNode node) throws UnsupportedMessageException {
-            return node.execute(receiver, arguments[0], arguments[1], arguments[2], arguments[3]);
+            System.out.println("JAVA - In doBuild");
+            return node.execute(receiver, arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
         }
 
         @Specialization(guards = {"member.equals(elementWiseExp)", "arguments.length == 0"})
@@ -163,6 +165,7 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization
         static Object doDefault(NormalizedMatrix receiver, String member, Object[] arguments) {
+            System.out.println("JAVA - In the doDefault");
             //TODO: throw exception here.
             return -1;
         }
@@ -172,10 +175,10 @@ public final class NormalizedMatrix implements TruffleObject {
     @GenerateUncached
     abstract static class BuildNode extends Node {
 
-        protected abstract Object execute(NormalizedMatrix receiver, Object S, Object K, Object R, Object Sempty);
+        protected abstract Object execute(NormalizedMatrix receiver, Object S, Object K, Object R, Object Sempty, Object adapter);
 
         @Specialization
-        Object doDefault(NormalizedMatrix receiver, Object S, Object Ks, Object Rs, Object Sempty,
+        Object doDefault(NormalizedMatrix receiver, Object S, Object Ks, Object Rs, Object Sempty, Object adapter,
             @CachedLibrary(limit = "10") InteropLibrary interop) {
             receiver.S = new MatrixAdapter(S);
 
@@ -197,6 +200,9 @@ public final class NormalizedMatrix implements TruffleObject {
                     receiver.Rs[i] = new MatrixAdapter(currR);
                 }
 	        receiver.Sempty = SemptyBool;
+                receiver.adapter = adapter;
+
+            System.out.println("JAVA - In BuildNode");
             }
 
             catch (Exception e) {
@@ -428,12 +434,15 @@ public final class NormalizedMatrix implements TruffleObject {
         Object doDefaultSempty(NormalizedMatrix receiver, Object matrix,
                          @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+            System.out.println("JAVA - in LMM 2");
             Integer start = new Integer(0);                   //TODO: cache this?
             Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
+            System.out.println("JAVA - in LMM 2 -- STEP 1");
             Integer matrixNumRows = matrixlibGen.getNumRows(adaptedMatrix);  // n_x (alternatively d in section 3.3.3)
             Integer matrixNumCols = matrixlibGen.getNumCols(adaptedMatrix);  // d_x
 
 
+            System.out.println("JAVA - in LMM 2 -- STEP 2");
             Integer d_prime_prev = start;
             Integer d_prime = matrixlibGen.getNumCols(receiver.Rs[0]);
 

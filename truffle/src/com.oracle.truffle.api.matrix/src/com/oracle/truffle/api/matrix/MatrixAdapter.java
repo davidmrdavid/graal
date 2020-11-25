@@ -175,6 +175,7 @@ public class MatrixAdapter implements TruffleObject {
     @ExportMessage
     public Integer getNumRows(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
         Object[] arguments = {};
+        System.out.println("JAVA - In getNumRows");
         return doCallInteger("getNumRows", arguments, interop);
     }
 
@@ -229,14 +230,19 @@ public class MatrixAdapter implements TruffleObject {
 
     public Integer doCallInteger(String memberName, Object[] arguments, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
         try {
+            System.out.println("JAVA - doCallInteger");
             Object boundFunction = interop.readMember(adaptee, memberName);
+            System.out.println("JAVA - readMemeber");
             Object result = interop.execute(boundFunction, arguments);
+            System.out.println("JAVA - executed");
             if(interop.isNumber(result) && interop.fitsInInt(result)) {
                 return interop.asInt(result);
             }
+            System.out.println("JAVA - throwing ex inside try");
             throw UnsupportedMessageException.create();
         }
         catch (ArityException | UnknownIdentifierException | UnsupportedMessageException | UnsupportedTypeException exception) {
+            System.out.println("JAVA - in catch");
             throw UnsupportedMessageException.create();
         }
     }
