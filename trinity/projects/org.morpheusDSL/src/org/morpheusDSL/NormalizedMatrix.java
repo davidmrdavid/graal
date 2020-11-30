@@ -110,6 +110,7 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(guards = {"member.equals(scalarAddition)", "arguments.length == 1"})
         static Object doScalarAddition(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
+            System.out.println("JAVA - In doScalarAddition");
             return node.execute(receiver, arguments[0]);
         }
 
@@ -180,7 +181,7 @@ public final class NormalizedMatrix implements TruffleObject {
         @Specialization
         Object doDefault(NormalizedMatrix receiver, Object S, Object Ks, Object Rs, Object Sempty, Object adapter,
             @CachedLibrary(limit = "10") InteropLibrary interop) {
-            receiver.S = new MatrixAdapter(S);
+            receiver.S = S;
 
             try {
                 //TODO: casting to int is unsafe here! this returns longs
@@ -196,11 +197,11 @@ public final class NormalizedMatrix implements TruffleObject {
                 for(int i = 0; i < sizeKs; i ++){
                     currK = interop.readArrayElement(Ks,i);
                     currR = interop.readArrayElement(Rs,i);
-                    receiver.Ks[i] = new MatrixAdapter(currK);
-                    receiver.Rs[i] = new MatrixAdapter(currR);
+                    receiver.Ks[i] = currK;
+                    receiver.Rs[i] = currR;
                 }
 	        receiver.Sempty = SemptyBool;
-                receiver.adapter = adapter;
+                receiver.adapter = new MatrixAdapter(adapter);
 
             System.out.println("JAVA - In BuildNode");
             }
@@ -288,15 +289,19 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
+            System.out.println("JAVA - In ScalarAddition Node");
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarAddition(receiver.Rs[i], scalar);
+                newRs[i] = matrixlibS.scalarAddition(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            Object newS = matrixlibS.scalarAddition(receiver.S, scalar);
+            //System.out.println("JAVA - Finish scalarAddition call");
+            Object newS = matrixlibS.scalarAddition(receiver.adapter, receiver.S, scalar);
+            System.out.println("JAVA - Finish scalarAddition call");
+
             return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
         }
 
@@ -308,7 +313,7 @@ public final class NormalizedMatrix implements TruffleObject {
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarAddition(receiver.Rs[i], scalar);
+                newRs[i] = matrixlibGen.scalarAddition(receiver.adapter, receiver.Rs[i], scalar);
             } 
             return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
         }
@@ -881,7 +886,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[0]);
                 rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[0]);
                 currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                result = matrixlibGen.scalarAddition(currentProd ,elementWiseSumS);
+                result = matrixlibGen.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
                     columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[i]);
@@ -912,7 +917,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[0]);
                 rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[0]);
                 currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                result = matrixlibGen.scalarAddition(currentProd ,elementWiseSumS);
+                result = matrixlibGen.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
                     columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[i]);
@@ -993,7 +998,8 @@ public final class NormalizedMatrix implements TruffleObject {
     }
 
     @ExportMessage
-    Object scalarAddition(Object scalar, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
+    Object scalarAddition(Object matrix, Object scalar, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
+        System.out.println("JAVA - IN scalarAddition Export Message");
         return node.execute(this, scalar);
     }
 

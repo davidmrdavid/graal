@@ -161,8 +161,8 @@ public class MatrixAdapter implements TruffleObject {
     }
 
     @ExportMessage
-    public Object scalarAddition(Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {scalar};
+    public Object scalarAddition(Object matrix, Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {matrix, scalar};
         return doCallObj("scalarAddition", arguments, interop);
     }
 
@@ -219,7 +219,7 @@ public class MatrixAdapter implements TruffleObject {
     public Object doCallObj(String memberName, Object[] arguments, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
         try {
            Object boundFunction = interop.readMember(adaptee, memberName);
-           Object tensor = new MatrixAdapter(interop.execute(boundFunction, arguments));
+           Object tensor = interop.execute(boundFunction, arguments);
            return tensor;
         }
         catch (ArityException | UnknownIdentifierException | UnsupportedMessageException | UnsupportedTypeException exception) {

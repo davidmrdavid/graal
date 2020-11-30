@@ -52,7 +52,7 @@ public abstract class MatrixLibrary extends Library {
     public abstract Object elementWiseLog(Object receiver) throws UnsupportedMessageException;
     public abstract Object elementWiseSqrt(Object receiver) throws UnsupportedMessageException;
 
-    public abstract Object scalarAddition(Object receiver, Object scalar) throws UnsupportedMessageException;
+    public abstract Object scalarAddition(Object receiver, Object matrix, Object scalar) throws UnsupportedMessageException;
     public abstract Object scalarMultiplication(Object receiver, Object scalar) throws UnsupportedMessageException;
     public abstract Object scalarExponentiation(Object receiver, Object scalar) throws UnsupportedMessageException;
 
