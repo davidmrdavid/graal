@@ -71,148 +71,148 @@ public class MatrixAdapter implements TruffleObject {
         return repr;
    }
 
-    @ExportMessage Object removeAbstractions(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    @ExportMessage Object removeAbstractions(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("removeAbstractions", arguments, interop);
     }
 
-    @ExportMessage Object unwrap(@CachedLibrary(limit = "3") InteropLibrary interop) {
-        return adaptee;
+    @ExportMessage Object unwrap(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) {
+        return adapter;
     }
 
     @ExportMessage
-    public Object crossProduct(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object crossProduct(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("crossProduct", arguments, interop);
     }
 
     @ExportMessage
-    public Object crossProductDuo(Object another, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {tensorlib.unwrap(another)};
+    public Object crossProductDuo(Object adapter, Object another, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, another};
         return doCallObj("crossProductDuo", arguments, interop);
     }
 
     @ExportMessage
-    public Object rowSum(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object rowSum(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("rowSum", arguments, interop);
     }
 
     @ExportMessage
-    public Object columnSum(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object columnSum(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("columnSum", arguments, interop);
 
     }
 
     @ExportMessage
-    public Double elementWiseSum(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Double elementWiseSum(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallDouble("elementWiseSum", arguments, interop);
     }
 
     @ExportMessage
-    public Object columnWiseAppend(Object tensor, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {tensorlib.unwrap(tensor)};
+    public Object columnWiseAppend(Object adapter, Object tensor, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, tensor};
         return doCallObj("columnWiseAppend", arguments, interop);
     }
 
     @ExportMessage
-    public Object splice(Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {rowStart, rowEnd, colStart, colEnd};
+    public Object splice(Object adapter, Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, rowStart, rowEnd, colStart, colEnd};
         return doCallObj("splice", arguments, interop);
     }
 
 
     @ExportMessage
-    public Object matrixAddition(Object otherMatrix, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException{ 
-        Object[] arguments = {tensorlib.unwrap(otherMatrix)};
+    public Object matrixAddition(Object adapter, Object otherMatrix, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException{ 
+        Object[] arguments = {adapter, otherMatrix};
         return doCallObj("matrixAddition", arguments, interop);
     }
 
     @ExportMessage
-    public Object rowWiseAppend(Object tensor, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {tensorlib.unwrap(tensor)};
+    public Object rowWiseAppend(Object adapter, Object tensor, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit="10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, tensor};
         return doCallObj("rowWiseAppend", arguments, interop);
     }
 
     @ExportMessage
-    public Object elementWiseExp(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object elementWiseExp(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("elementWiseExp", arguments, interop);
     }
 
     @ExportMessage
-    public Object elementWiseSqrt(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object elementWiseSqrt(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("elementWiseSqrt", arguments, interop);
     }
 
     @ExportMessage
-    public Object elementWiseLog(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object elementWiseLog(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("elementWiseLog", arguments, interop);
     }
 
     @ExportMessage
-    public Object diagonal(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object diagonal(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("diagonal", arguments, interop);
     }
 
     @ExportMessage
-    public Object scalarAddition(Object matrix, Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {matrix, scalar};
+    public Object scalarAddition(Object adapter, Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, scalar};
         return doCallObj("scalarAddition", arguments, interop);
     }
 
     @ExportMessage
-    public Object scalarMultiplication(Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {scalar};
+    public Object scalarMultiplication(Object adapter, Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, scalar};
         return doCallObj("scalarMultiplication", arguments, interop);
     }
 
     @ExportMessage
-    public Integer getNumRows(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Integer getNumRows(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         System.out.println("JAVA - In getNumRows");
         return doCallInteger("getNumRows", arguments, interop);
     }
 
     @ExportMessage
-    public Integer getNumCols(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException{
-        Object[] arguments = {};
+    public Integer getNumCols(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException{
+        Object[] arguments = {adapter};
         return doCallInteger("getNumCols", arguments, interop);
     }
 
     @ExportMessage
-    public Object scalarExponentiation(Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {scalar};
+    public Object scalarExponentiation(Object adapter, Object scalar, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, scalar};
         return doCallObj("scalarExponentiation", arguments, interop);
     }
 
     @ExportMessage
-    public Object leftMatrixMultiplication(Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {tensorlib.unwrap(vector)};
+    public Object leftMatrixMultiplication(Object adapter, Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, vector};
         return doCallObj("leftMatrixMultiplication", arguments, interop);
     }
 
     @ExportMessage
-    public Object rightMatrixMultiplication(Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {tensorlib.unwrap(vector)};
+    public Object rightMatrixMultiplication(Object adapter, Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, vector};
         return doCallObj("rightMatrixMultiplication", arguments, interop);
     }
 
     //TODO: Setting `limit= "3"` in here breaks LogReg. Why?
     @ExportMessage
-    public Object transpose(@CachedLibrary(limit = "10") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object transpose(Object adapter, @CachedLibrary(limit = "10") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("transpose", arguments, interop);
     }
 
     @ExportMessage
-    public Object invertMatrix(@CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
-        Object[] arguments = {};
+    public Object invertMatrix(Object adapter, @CachedLibrary(limit = "3") InteropLibrary interop) throws UnsupportedMessageException {
+        Object[] arguments = {adapter};
         return doCallObj("invertMatrix", arguments, interop);
     }
 

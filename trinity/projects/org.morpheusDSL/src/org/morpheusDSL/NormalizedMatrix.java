@@ -107,7 +107,8 @@ public final class NormalizedMatrix implements TruffleObject {
         static Object doElementWiseLog(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ElementWiseLogNode node) throws UnsupportedMessageException {
             return node.execute(receiver);
         }
-
+        
+        //add
         @Specialization(guards = {"member.equals(scalarAddition)", "arguments.length == 1"})
         static Object doScalarAddition(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
             System.out.println("JAVA - In doScalarAddition");
@@ -116,6 +117,7 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(guards = {"member.equals(scalarMultiplication)", "arguments.length == 1"})
         static Object doScalarMultiplication(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ScalarMultiplicationNode node) throws UnsupportedMessageException {
+            System.out.println("JAVA - In doScalarMultiplication");
             return node.execute(receiver, arguments[0]);
         }
 
@@ -223,29 +225,29 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object executeDefault(NormalizedMatrix receiver,
-                              @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                               @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.elementWiseExp(receiver.Rs[i]);
+                newRs[i] = matrixlibS.elementWiseExp(receiver.adapter, receiver.Rs[i]);
             } 
-            Object newS = matrixlibS.elementWiseExp(receiver.S);
-            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            Object newS = matrixlibS.elementWiseExp(receiver.adapter, receiver.S);
+            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object executeDefaultSempty(NormalizedMatrix receiver,
-                              @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                               @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.elementWiseExp(receiver.Rs[i]);
+                newRs[i] = matrixlibS.elementWiseExp(receiver.adapter, receiver.Rs[i]);
             } 
-            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
     }
 
@@ -256,29 +258,29 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.elementWiseLog(receiver.Rs[i]);
+                newRs[i] = matrixlibS.elementWiseLog(receiver.adapter, receiver.Rs[i]);
             } 
-            Object newS = matrixlibS.elementWiseLog(receiver.S);
-            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            Object newS = matrixlibS.elementWiseLog(receiver.adapter, receiver.S);
+            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.elementWiseLog(receiver.Rs[i]);
+                newRs[i] = matrixlibS.elementWiseLog(receiver.adapter, receiver.Rs[i]);
             } 
-            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
     }
 
@@ -302,20 +304,20 @@ public final class NormalizedMatrix implements TruffleObject {
             Object newS = matrixlibS.scalarAddition(receiver.adapter, receiver.S, scalar);
             System.out.println("JAVA - Finish scalarAddition call");
 
-            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarAddition(receiver.adapter, receiver.Rs[i], scalar);
+                newRs[i] = matrixlibS.scalarAddition(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
     }
 
@@ -326,29 +328,29 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarMultiplication(receiver.Rs[i], scalar);
+                newRs[i] = matrixlibS.scalarMultiplication(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            Object newS = matrixlibS.scalarMultiplication(receiver.S, scalar);
-            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            Object newS = matrixlibS.scalarMultiplication(receiver.adapter, receiver.S, scalar);
+            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarMultiplication(receiver.Rs[i], scalar);
+                newRs[i] = matrixlibS.scalarMultiplication(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
     }
@@ -360,32 +362,32 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
 
             for(int i = 0; i < size; i++) {
-                Object temp = matrixlibGen.scalarExponentiation(receiver.Rs[i], scalar);
+                Object temp = matrixlibS.scalarExponentiation(receiver.adapter, receiver.Rs[i], scalar);
                 newRs[i] = temp;
             } 
-            Object newS = matrixlibS.scalarExponentiation(receiver.S, scalar);
-            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            Object newS = matrixlibS.scalarExponentiation(receiver.adapter, receiver.S, scalar);
+            return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
 
             for(int i = 0; i < size; i++) {
-                newRs[i] = matrixlibGen.scalarExponentiation(receiver.Rs[i], scalar);
+                newRs[i] = matrixlibS.scalarExponentiation(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
     }
@@ -399,19 +401,19 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T","!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver, Object matrix,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
             Integer start = new Integer(0);                   //TODO: cache this?
-            Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
-            Integer sNumRows = matrixlibS.getNumRows(receiver.S);            // n_s
-            Integer matrixNumRows = matrixlibGen.getNumRows(adaptedMatrix);  // n_x (alternatively d in section 3.3.3)
-            Integer matrixNumCols = matrixlibGen.getNumCols(adaptedMatrix);  // d_x
+            //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
+            Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
+            Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
+            Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
 
 
-            Integer sNumCols = matrixlibS.getNumCols(receiver.S);
-            Object firstSplice = matrixlibGen.splice(adaptedMatrix, start, sNumCols - 1, start, matrixNumCols - 1);
+            Integer sNumCols = matrixlibS.getNumCols(receiver.adapter, receiver.S);
+            Object firstSplice = matrixlibS.splice(receiver.adapter, matrix, start, sNumCols - 1, start, matrixNumCols - 1);
 
-            Object leftSummand = matrixlibS.rightMatrixMultiplication(receiver.S, firstSplice);
+            Object leftSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.S, firstSplice);
 
 
             Object result = leftSummand;
@@ -422,73 +424,73 @@ public final class NormalizedMatrix implements TruffleObject {
             Integer d_prime = sNumCols;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i ++) {
-                d_prime += matrixlibGen.getNumCols(receiver.Rs[i]);
+                d_prime += matrixlibS.getNumCols(receiver.adapter, receiver.Rs[i]);
 
-                secondSplice = matrixlibGen.splice(adaptedMatrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
+                secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
-                rightSummandInnerProd = matrixlibGen.rightMatrixMultiplication(receiver.Rs[i], secondSplice);
-                rightSummand = matrixlibGen.rightMatrixMultiplication(receiver.Ks[i], rightSummandInnerProd);
-                result = matrixlibGen.matrixAddition(result, rightSummand);              
+                rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
+                rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
+                result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver, Object matrix,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
             System.out.println("JAVA - in LMM 2");
             Integer start = new Integer(0);                   //TODO: cache this?
-            Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
+            //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
             System.out.println("JAVA - in LMM 2 -- STEP 1");
-            Integer matrixNumRows = matrixlibGen.getNumRows(adaptedMatrix);  // n_x (alternatively d in section 3.3.3)
-            Integer matrixNumCols = matrixlibGen.getNumCols(adaptedMatrix);  // d_x
+            Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
+            Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
 
 
             System.out.println("JAVA - in LMM 2 -- STEP 2");
             Integer d_prime_prev = start;
-            Integer d_prime = matrixlibGen.getNumCols(receiver.Rs[0]);
+            Integer d_prime = matrixlibS.getNumCols(receiver.adapter, receiver.Rs[0]);
 
 
-            Object secondSplice = matrixlibGen.splice(adaptedMatrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
+            Object secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
             d_prime_prev = d_prime;
 
-            Object rightSummandInnerProd = matrixlibGen.rightMatrixMultiplication(receiver.Rs[0], secondSplice);
-            Object rightSummand = matrixlibGen.rightMatrixMultiplication(receiver.Ks[0], rightSummandInnerProd);
+            Object rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[0], secondSplice);
+            Object rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], rightSummandInnerProd);
 
 
             Object result = rightSummand;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++) {
-                d_prime += matrixlibGen.getNumCols(receiver.Rs[i]);
+                d_prime += matrixlibS.getNumCols(receiver.adapter, receiver.Rs[i]);
 
-                secondSplice = matrixlibGen.splice(adaptedMatrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
+                secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
-                rightSummandInnerProd = matrixlibGen.rightMatrixMultiplication(receiver.Rs[i], secondSplice);
-                rightSummand = matrixlibGen.rightMatrixMultiplication(receiver.Ks[i], rightSummandInnerProd);
-                result = matrixlibGen.matrixAddition(result, rightSummand);              
+                rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
+                rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
+                result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = "receiver.T")
         Object doDefaultT(NormalizedMatrix receiver, Object vector,
                          @Cached RightMatrixMultiplicationNode node,
-                         @CachedLibrary(limit = "20") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS) throws UnsupportedMessageException {
 
-            Object vectorAdapter = new MatrixAdapter(vector);
-            Object vectorT = matrixlibGen.transpose(vectorAdapter);
-            Object vectorTUnwrapped = matrixlibGen.unwrap(vectorT);
+            //Object vectorAdapter = new MatrixAdapter(vector);
+            Object vectorT = matrixlibS.transpose(receiver.adapter, vector);
+            Object vectorTUnwrapped = matrixlibS.unwrap(receiver.adapter, vectorT);
             receiver.T = !receiver.T;
             Object rmm = node.execute(receiver, vectorTUnwrapped);
             receiver.T = !receiver.T;
-            Object rmmAdapted = new MatrixAdapter(rmm);
-            Object rmmAdaptedT = matrixlibGen.transpose(rmmAdapted);
-            Object resultUnwrapped = matrixlibGen.unwrap(rmmAdaptedT);
+            //Object rmmAdapted = new MatrixAdapter(rmm);
+            Object rmmAdaptedT = matrixlibS.transpose(receiver.adapter, rmm);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, rmmAdaptedT);
             return resultUnwrapped;
         }
 
@@ -503,56 +505,56 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver, Object vector,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
-            Object vectorAdapter = new MatrixAdapter(vector);
-            Object leftmostColumns = matrixlibS.leftMatrixMultiplication(receiver.S, vectorAdapter);
+            //Object vectorAdapter = new MatrixAdapter(vector);
+            Object leftmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.S, vector);
             Object result = leftmostColumns;
             Object vecByK = null;
             Object rightmostColumns = null;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i++) {
-                vecByK = matrixlibGen.leftMatrixMultiplication(receiver.Ks[i], vectorAdapter);
-                rightmostColumns = matrixlibGen.leftMatrixMultiplication(receiver.Rs[i], vecByK);
-                result = matrixlibGen.columnWiseAppend(result, rightmostColumns);
+                vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
+                rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
+                result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver, Object vector,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
-            Object vectorAdapter = new MatrixAdapter(vector);
+            //Object vectorAdapter = new MatrixAdapter(vector);
 
-            Object vecByK = matrixlibGen.leftMatrixMultiplication(receiver.Ks[0], vectorAdapter);
-            Object rightmostColumns = matrixlibGen.leftMatrixMultiplication(receiver.Rs[0], vecByK);
+            Object vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[0], vector);
+            Object rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], vecByK);
 
             Object result = rightmostColumns;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i++) {
-                vecByK = matrixlibGen.leftMatrixMultiplication(receiver.Ks[i], vectorAdapter);
-                rightmostColumns = matrixlibGen.leftMatrixMultiplication(receiver.Rs[i], vecByK);
-                result = matrixlibGen.columnWiseAppend(result, rightmostColumns);
+                vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
+                rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
+                result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = "receiver.T")
         Object doDefaultT(NormalizedMatrix receiver, Object vector,
                          @Cached LeftMatrixMultiplicationNode node123,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
-            Object vectorAdapter = new MatrixAdapter(vector);
-            Object vectorT = matrixlibGen.transpose(vectorAdapter);
-            Object vectorTUnwrapped = matrixlibGen.unwrap(vectorT);
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+            //Object vectorAdapter = new MatrixAdapter(vector);
+            Object vectorT = matrixlibGen.transpose(receiver.adapter, vector);
+            Object vectorTUnwrapped = matrixlibGen.unwrap(receiver.adapter, vectorT);
             receiver.T = !receiver.T;
             Object lmm = node123.execute(receiver, vectorTUnwrapped);
             receiver.T = !receiver.T;
-            Object lmmAdapted = new MatrixAdapter(lmm);
-            Object lmmAdaptedT = matrixlibGen.transpose(lmmAdapted);
-            Object resultUnwrapped = matrixlibGen.unwrap(lmmAdaptedT);
+            //Object lmmAdapted = new MatrixAdapter(lmm);
+            Object lmmAdaptedT = matrixlibGen.transpose(receiver.adapter, lmm);
+            Object resultUnwrapped = matrixlibGen.unwrap(receiver.adapter, lmmAdaptedT);
             return resultUnwrapped;
 
         }
@@ -567,17 +569,18 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization
         Object doDefault(NormalizedMatrix receiver) throws UnsupportedMessageException {
-            return createCopy(receiver.S, receiver.Ks, receiver.Rs, !receiver.T, receiver.Sempty);
+            return createCopy(receiver.S, receiver.Ks, receiver.Rs, !receiver.T, receiver.Sempty, receiver.adapter);
         }
     }
 
-    public static Object createCopy(Object S, Object[] Ks, Object[] Rs, boolean T, boolean Sempty){
+    public static Object createCopy(Object S, Object[] Ks, Object[] Rs, boolean T, boolean Sempty, Object adapter){
         NormalizedMatrix newNormalizedTable = new NormalizedMatrix();
         newNormalizedTable.S = S;
         newNormalizedTable.Ks = Ks;
         newNormalizedTable.Rs = Rs;
         newNormalizedTable.T = T;
         newNormalizedTable.Sempty = Sempty;
+        newNormalizedTable.adapter = adapter;
         return newNormalizedTable;
     }
 
@@ -608,66 +611,62 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
-            Object sTransposed = matrixlibS.transpose(receiver.S);
-            Object crossProdS = matrixlibS.crossProduct(receiver.S); 
+            Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
+            Object crossProdS = matrixlibS.crossProduct(receiver.adapter, receiver.S); 
 
             Object Y2I = null;
             Object Y2ICol = null;
-            Y2I = matrixlibGen.crossProductDuo(receiver.Ks[0], receiver.S);
+            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[0], receiver.S);
 
-            Y2I = matrixlibGen.crossProductDuo(receiver.Rs[0], Y2I);
-            Object Y2ITrans = matrixlibGen.transpose(Y2I);
+            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[0], Y2I);
+            Object Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
 
 
             Object diagElem = null;
-            diagElem = matrixlibGen.columnSum(receiver.Ks[0]);
-            diagElem = matrixlibGen.elementWiseSqrt(diagElem);
-            diagElem = matrixlibGen.diagonal(diagElem);
-            diagElem = matrixlibGen.rightMatrixMultiplication(diagElem, receiver.Rs[0]);
-            diagElem = matrixlibGen.crossProduct(diagElem);
-            Object resultRow1 = matrixlibGen.columnWiseAppend(crossProdS, Y2ITrans);
+            diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
+            diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
+            diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
+            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);
+            diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
+            Object resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, crossProdS, Y2ITrans);
 
-            Object resultRow2 = matrixlibGen.columnWiseAppend(Y2I, diagElem);
-            Object result = matrixlibGen.rowWiseAppend(resultRow1, resultRow2);
+            Object resultRow2 = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, diagElem);
+            Object result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
 
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++) {
-                Y2I = matrixlibGen.crossProductDuo(receiver.Ks[i], receiver.S);
-                Y2I = matrixlibGen.crossProductDuo(receiver.Rs[i], Y2I);
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[i], receiver.S);
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2I);
                 for(int j = 0; j < i; j++) {
-                    Y2ICol = matrixlibGen.crossProductDuo(receiver.Ks[j], receiver.Ks[i]);
-                    Y2ICol = matrixlibGen.crossProductDuo(Y2ICol, receiver.Rs[j]);
-                    Y2ICol = matrixlibGen.crossProductDuo(receiver.Rs[i], Y2ICol);
-                    Y2I = matrixlibGen.columnWiseAppend(Y2I, Y2ICol);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[j], receiver.Ks[i]);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, Y2ICol, receiver.Rs[j]);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2ICol);
+                    Y2I = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, Y2ICol);
                 }
-                diagElem = matrixlibGen.columnSum(receiver.Ks[i]);
-                diagElem = matrixlibGen.elementWiseSqrt(diagElem);
-                diagElem = matrixlibGen.diagonal(diagElem);
-                diagElem = matrixlibGen.rightMatrixMultiplication(diagElem, receiver.Rs[i]);
-                diagElem = matrixlibGen.crossProduct(diagElem);
+                diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
+                diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
+                diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
+                diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
 
 
-                Y2ITrans = matrixlibGen.transpose(Y2I);
+                Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
 
-                resultRow1 = matrixlibGen.columnWiseAppend(result, Y2ITrans);
-                resultRow2 = matrixlibGen.columnWiseAppend(Y2I, diagElem);
-                result = matrixlibGen.rowWiseAppend(resultRow1, resultRow2);
+                resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, result, Y2ITrans);
+                resultRow2 = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, diagElem);
+                result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
 
             }
-	    Object resultUnwrapped = matrixlibGen.unwrap(result);
+	    Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
             }
 
         @Specialization(limit = "3", guards = {"!receiver.T", "receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
 
@@ -678,11 +677,11 @@ public final class NormalizedMatrix implements TruffleObject {
 
 
             Object diagElem = null;
-            diagElem = matrixlibGen.columnSum(receiver.Ks[0]);
-            diagElem = matrixlibGen.elementWiseSqrt(diagElem);
-            diagElem = matrixlibGen.diagonal(diagElem);
-            diagElem = matrixlibGen.rightMatrixMultiplication(diagElem, receiver.Rs[0]);
-            diagElem = matrixlibGen.crossProduct(diagElem);
+            diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
+            diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
+            diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
+            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);
+            diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
             Object resultRow1 = null;
 
             Object resultRow2 = null;
@@ -690,49 +689,47 @@ public final class NormalizedMatrix implements TruffleObject {
 
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++) {
-                Y2I = matrixlibGen.crossProductDuo(receiver.Ks[0], receiver.Ks[i]);
-                Y2I = matrixlibGen.crossProductDuo(Y2I,receiver.Rs[0]);
-                Y2I = matrixlibGen.crossProductDuo(receiver.Rs[i], Y2I);
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[0], receiver.Ks[i]);
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, Y2I,receiver.Rs[0]);
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2I);
                 for(int j = 1; j < i; j++) {
-                    Y2ICol = matrixlibGen.crossProductDuo(receiver.Ks[j], receiver.Ks[i]);
-                    Y2ICol = matrixlibGen.crossProductDuo(Y2ICol, receiver.Rs[j]);
-                    Y2ICol = matrixlibGen.crossProductDuo(receiver.Rs[i], Y2ICol);
-                    Y2I = matrixlibGen.columnWiseAppend(Y2I, Y2ICol);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[j], receiver.Ks[i]);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, Y2ICol, receiver.Rs[j]);
+                    Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2ICol);
+                    Y2I = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, Y2ICol);
                 }
-                diagElem = matrixlibGen.columnSum(receiver.Ks[i]);
-                diagElem = matrixlibGen.elementWiseSqrt(diagElem);
-                diagElem = matrixlibGen.diagonal(diagElem);
-                diagElem = matrixlibGen.rightMatrixMultiplication(diagElem, receiver.Rs[i]);
-                diagElem = matrixlibGen.crossProduct(diagElem);
+                diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
+                diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
+                diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
+                diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
 
-                Y2ITrans = matrixlibGen.transpose(Y2I);
-                resultRow1 = matrixlibGen.columnWiseAppend(result, Y2ITrans);
-                resultRow2 = matrixlibGen.columnWiseAppend(Y2I, diagElem);
-                result = matrixlibGen.rowWiseAppend(resultRow1, resultRow2);
+                Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
+                resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, result, Y2ITrans);
+                resultRow2 = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, diagElem);
+                result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
 
             }
-	    Object resultUnwrapped = matrixlibGen.unwrap(result);
+	    Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
 
        }
 
         @Specialization(limit = "3", guards = "receiver.T")
         Object doTransposed(NormalizedMatrix receiver,
-                            @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                            @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                            @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                            @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                             @CachedLibrary(limit = "4") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
             //Compute the Gram matrix
-            Object sTransposed = matrixlibS.transpose(receiver.S);
-            Object crossProdSTrans = matrixlibGen.crossProduct(sTransposed);
+            Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
+            Object crossProdSTrans = matrixlibS.crossProduct(receiver.adapter, sTransposed);
 
-            Object rTransposed = matrixlibR.transpose(receiver.R);
-            Object crossProdRTrans = matrixlibGen.crossProduct(rTransposed);
-            Object kByCrossProd = matrixlibK.rightMatrixMultiplication(receiver.K, crossProdRTrans);
-            Object kTransposed = matrixlibK.transpose(receiver.K);
-            Object rightSummand = matrixlibGen.rightMatrixMultiplication(kByCrossProd, kTransposed);
+            Object rTransposed = matrixlibS.transpose(receiver.adapter, receiver.R);
+            Object crossProdRTrans = matrixlibS.crossProduct(receiver.adapter, rTransposed);
+            Object kByCrossProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.K, crossProdRTrans);
+            Object kTransposed = matrixlibS.transpose(receiver.adapter, receiver.K);
+            Object rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, kByCrossProd, kTransposed);
 
-            Object result = matrixlibGen.matrixAddition(crossProdSTrans, rightSummand);
+            Object result = matrixlibS.matrixAddition(receiver.adapter, crossProdSTrans, rightSummand);
             return result;
         }
     }
@@ -744,57 +741,53 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T","!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
-            Object rowSumS = matrixlibS.rowSum(receiver.S);
-            Object tempo = matrixlibGen.rowSum(receiver.Rs[0]);
+            Object rowSumS = matrixlibS.rowSum(receiver.adapter, receiver.S);
+            Object tempo = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
             Object rowSumR = null; 
             Object currProd = null;
             Object result = rowSumS;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i ++){
-                rowSumR = matrixlibGen.rowSum(receiver.Rs[i]);
-                currProd = matrixlibGen.rightMatrixMultiplication(receiver.Ks[i], rowSumR);
-                result = matrixlibGen.matrixAddition(result, currProd);
+                rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
+                currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
+                result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T", "receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
-            Object rowSumR = matrixlibGen.rowSum(receiver.Rs[0]);
-            Object currProd = matrixlibGen.rightMatrixMultiplication(receiver.Ks[0], rowSumR);
+            Object rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
+            Object currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], rowSumR);
             Object rowSumS = currProd;
             Object result = rowSumS;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++){
-                rowSumR = matrixlibGen.rowSum(receiver.Rs[i]);
-                currProd = matrixlibGen.rightMatrixMultiplication(receiver.Ks[i], rowSumR);
-                result = matrixlibGen.matrixAddition(result, currProd);
+                rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
+                currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
+                result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "1", guards = "receiver.T")
         Object doDefault(NormalizedMatrix receiver,
                          @Cached ColumnSumNode node,
-                         @CachedLibrary(limit = "1") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS) throws UnsupportedMessageException {
             receiver.T = !receiver.T; //TODO: such that regular rowSum is executed. Potentially unsafe
             Object rowSum = node.execute(receiver);
             receiver.T = !receiver.T;
-            Object rowSumAdapter = new MatrixAdapter(rowSum);
-            Object rowSumT = matrixlibGen.transpose(rowSumAdapter);
-            Object result = matrixlibGen.unwrap(rowSumT);
+            //Object rowSumAdapter = new MatrixAdapter(rowSum);
+            Object rowSumT = matrixlibS.transpose(receiver.adapter, rowSum);
+            Object result = matrixlibS.unwrap(receiver.adapter, rowSumT);
             return result;
 
         }
@@ -808,56 +801,52 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
-            Object columnSumS = matrixlibS.columnSum(receiver.S);
+            Object columnSumS = matrixlibS.columnSum(receiver.adapter, receiver.S);
             Object result = columnSumS;
             Object columnSumK = null;
             Object rightCols = null;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i++) {
-                columnSumK = matrixlibGen.columnSum(receiver.Ks[i]);
-                rightCols = matrixlibGen.leftMatrixMultiplication(receiver.Rs[i], columnSumK);
-                result = matrixlibGen.columnWiseAppend(result, rightCols);
+                columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
+                result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
-                         @CachedLibrary("receiver.K") MatrixLibrary matrixlibK,
-                         @CachedLibrary("receiver.R") MatrixLibrary matrixlibR,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
-            Object columnSumK = matrixlibGen.columnSum(receiver.Ks[0]);
-            Object rightCols = matrixlibGen.leftMatrixMultiplication(receiver.Rs[0], columnSumK);
+            Object columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
+            Object rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], columnSumK);
 
             Object result = rightCols;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i++) {
-                columnSumK = matrixlibGen.columnSum(receiver.Ks[i]);
-                rightCols = matrixlibGen.leftMatrixMultiplication(receiver.Rs[i], columnSumK);
-                result = matrixlibGen.columnWiseAppend(result, rightCols);
+                columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
+                result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "1", guards = "receiver.T")
         Object doTransposed(NormalizedMatrix receiver,
                             @Cached RowSumNode node,
-                            @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                            @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS) throws UnsupportedMessageException {
 
             receiver.T = !receiver.T; //TODO: such that regular rowSum is executed. Potentially unsafe?
             Object rowSum = node.execute(receiver);
             receiver.T = !receiver.T;
-            Object rowSumAdapter = new MatrixAdapter(rowSum);
-            Object rowSumT = matrixlibGen.transpose(rowSumAdapter);
-            Object result = matrixlibGen.unwrap(rowSumT);
+            //Object rowSumAdapter = new MatrixAdapter(rowSum);
+            Object rowSumT = matrixlibS.transpose(receiver.adapter, rowSum);
+            Object result = matrixlibS.unwrap(receiver.adapter, rowSumT);
             return result;
         }
     }
@@ -870,11 +859,11 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") InteropLibrary interop,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
-            Double elementWiseSumS = matrixlibS.elementWiseSum(receiver.S);
+            Double elementWiseSumS = matrixlibS.elementWiseSum(receiver.adapter, receiver.S);
             Object columnWiseSumK = null;
             Object rowWiseSumR = null;
             Object currentProd = null;
@@ -883,25 +872,25 @@ public final class NormalizedMatrix implements TruffleObject {
             Object result = null;
             int size = receiver.Rs.length;
             if( size > 0 ){
-                columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[0]);
-                rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[0]);
-                currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                result = matrixlibGen.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
+                columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
+                rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
+                currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                result = matrixlibS.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
-                    columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[i]);
-                    rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[i]);
-                    currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                    result = matrixlibGen.matrixAddition(result, currentProd);
+                    columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                    rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
+                    currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                    result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.S") MatrixLibrary matrixlibS,
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
                          @CachedLibrary(limit = "10") InteropLibrary interop,
                          @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
 
@@ -914,19 +903,19 @@ public final class NormalizedMatrix implements TruffleObject {
             Object result = null;
             int size = receiver.Rs.length;
             if( size > 0 ){
-                columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[0]);
-                rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[0]);
-                currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                result = matrixlibGen.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
+                columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
+                rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
+                currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                result = matrixlibS.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
-                    columnWiseSumK = matrixlibGen.columnSum(receiver.Ks[i]);
-                    rowWiseSumR = matrixlibGen.rowSum(receiver.Rs[i]);
-                    currentProd = matrixlibGen.rightMatrixMultiplication(columnWiseSumK, rowWiseSumR);
-                    result = matrixlibGen.matrixAddition(result, currentProd);
+                    columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
+                    rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
+                    currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                    result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }
-            Object resultUnwrapped = matrixlibGen.unwrap(result);
+            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
             return resultUnwrapped;
         }
     }
@@ -978,93 +967,93 @@ public final class NormalizedMatrix implements TruffleObject {
     }
 
     @ExportMessage
-    Object elementWiseExp(@Cached ElementWiseExpNode node) throws UnsupportedMessageException {
+    Object elementWiseExp(Object adapter, @Cached ElementWiseExpNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Integer getNumRows() {
+    Integer getNumRows(Object adapter) {
         return -1;
     }
 
     @ExportMessage
-    Integer getNumCols() {
+    Integer getNumCols(Object adapter) {
         return -1;
     }
 
     @ExportMessage
-    Object elementWiseLog(@Cached ElementWiseLogNode node) throws UnsupportedMessageException {
+    Object elementWiseLog(Object adapter, @Cached ElementWiseLogNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Object scalarAddition(Object matrix, Object scalar, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
+    Object scalarAddition(Object adapter, Object scalar, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
         System.out.println("JAVA - IN scalarAddition Export Message");
         return node.execute(this, scalar);
     }
 
     @ExportMessage
-    Object scalarMultiplication(Object scalar, @Cached ScalarMultiplicationNode node) throws UnsupportedMessageException {
+    Object scalarMultiplication(Object adapter, Object scalar, @Cached ScalarMultiplicationNode node) throws UnsupportedMessageException {
         return node.execute(this, scalar);
     }
 
     @ExportMessage
-    Object scalarExponentiation(Object scalar, @Cached ScalarExponentiationNode node) throws UnsupportedMessageException {
+    Object scalarExponentiation(Object adapter, Object scalar, @Cached ScalarExponentiationNode node) throws UnsupportedMessageException {
         return node.execute(this, scalar);
     }
 
     @ExportMessage
-    Object leftMatrixMultiplication(Object vector, @Cached LeftMatrixMultiplicationNode node) throws UnsupportedMessageException {
+    Object leftMatrixMultiplication(Object adapter, Object vector, @Cached LeftMatrixMultiplicationNode node) throws UnsupportedMessageException {
         return node.execute(this, vector);
     }
 
     @ExportMessage
-    Object rightMatrixMultiplication(Object vector, @Cached RightMatrixMultiplicationNode node) throws UnsupportedMessageException {
+    Object rightMatrixMultiplication(Object adapter, Object vector, @Cached RightMatrixMultiplicationNode node) throws UnsupportedMessageException {
         return node.execute(this, vector);
     }
 
     @ExportMessage
-    Object transpose(@Cached TransposeNode node) throws UnsupportedMessageException {
+    Object transpose(Object adapter, @Cached TransposeNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Object invertMatrix(@Cached InvertMatrixNode node) throws UnsupportedMessageException {
+    Object invertMatrix(Object adapter, @Cached InvertMatrixNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Object crossProduct(@Cached CrossProductNode node) throws UnsupportedMessageException {
+    Object crossProduct(Object adapter, @Cached CrossProductNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Object rowSum(@Cached RowSumNode node) throws UnsupportedMessageException {
+    Object rowSum(Object adapter, @Cached RowSumNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Object columnSum(@Cached ColumnSumNode node) throws UnsupportedMessageException {
+    Object columnSum(Object adapter, @Cached ColumnSumNode node) throws UnsupportedMessageException {
         return node.execute(this);
     }
 
     @ExportMessage
-    Double elementWiseSum(@Cached ElementWiseSumNode node) throws UnsupportedMessageException {
+    Double elementWiseSum(Object adapter, @Cached ElementWiseSumNode node) throws UnsupportedMessageException {
         return 0.0;
     }
 
     @ExportMessage
-    Object rowWiseAppend(Object matrix, @Cached RowWiseAppendNode node) throws UnsupportedMessageException {
+    Object rowWiseAppend(Object adapter, Object matrix, @Cached RowWiseAppendNode node) throws UnsupportedMessageException {
         return node.execute(this, matrix);
     }
 
     @ExportMessage
-    Object columnWiseAppend(Object matrix, @Cached ColumnWiseAppendNode node) throws UnsupportedMessageException {
+    Object columnWiseAppend(Object adapter, Object matrix, @Cached ColumnWiseAppendNode node) throws UnsupportedMessageException {
         return node.execute(this, matrix);
     }
 
     @ExportMessage
-    Object splice(Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd, @Cached SpliceNode node) throws UnsupportedMessageException {
+    Object splice(Object adapter, Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd, @Cached SpliceNode node) throws UnsupportedMessageException {
         return node.execute(this, rowStart, rowEnd, colStart, colEnd);
     }
 
@@ -1072,12 +1061,12 @@ public final class NormalizedMatrix implements TruffleObject {
 
 
     @ExportMessage
-    Object unwrap(){
+    Object unwrap(Object adapter){
         return null;
     }
 
     @ExportMessage
-    Object removeAbstractions(){
+    Object removeAbstractions(Object adapter){
         return null;
     }
 
@@ -1146,11 +1135,11 @@ public final class NormalizedMatrix implements TruffleObject {
     }
 
     //TODO: These are unsupported too
-    @ExportMessage Object elementWiseSqrt() throws UnsupportedMessageException { return null; }
-    @ExportMessage Object crossProductDuo(Object another) throws UnsupportedMessageException { return null; }
-    @ExportMessage Object diagonal() throws UnsupportedMessageException { return null; }
+    @ExportMessage Object elementWiseSqrt(Object adapter) throws UnsupportedMessageException { return null; }
+    @ExportMessage Object crossProductDuo(Object adapter, Object another) throws UnsupportedMessageException { return null; }
+    @ExportMessage Object diagonal(Object adapter) throws UnsupportedMessageException { return null; }
     @ExportMessage
-    Object matrixAddition(Object otherMatrix, @Cached MatrixAdditionNode node) throws UnsupportedMessageException {
+    Object matrixAddition(Object adapter, Object otherMatrix, @Cached MatrixAdditionNode node) throws UnsupportedMessageException {
         return null;
     }
 

@@ -48,36 +48,36 @@ import com.oracle.truffle.api.library.Library;
 @GenerateLibrary
 public abstract class MatrixLibrary extends Library {
 
-    public abstract Object elementWiseExp(Object receiver) throws UnsupportedMessageException;
-    public abstract Object elementWiseLog(Object receiver) throws UnsupportedMessageException;
-    public abstract Object elementWiseSqrt(Object receiver) throws UnsupportedMessageException;
+    public abstract Object elementWiseExp(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object elementWiseLog(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object elementWiseSqrt(Object receiver, Object adapter) throws UnsupportedMessageException;
 
-    public abstract Object scalarAddition(Object receiver, Object matrix, Object scalar) throws UnsupportedMessageException;
-    public abstract Object scalarMultiplication(Object receiver, Object scalar) throws UnsupportedMessageException;
-    public abstract Object scalarExponentiation(Object receiver, Object scalar) throws UnsupportedMessageException;
+    public abstract Object scalarAddition(Object receiver, Object adapter, Object scalar) throws UnsupportedMessageException;
+    public abstract Object scalarMultiplication(Object receiver, Object adapter, Object scalar) throws UnsupportedMessageException;
+    public abstract Object scalarExponentiation(Object receiver, Object adapter, Object scalar) throws UnsupportedMessageException;
 
-    public abstract Object leftMatrixMultiplication(Object receiver, Object vector) throws UnsupportedMessageException;
-    public abstract Object rightMatrixMultiplication(Object receiver, Object vector) throws UnsupportedMessageException;
+    public abstract Object leftMatrixMultiplication(Object receiver, Object adapter, Object vector) throws UnsupportedMessageException;
+    public abstract Object rightMatrixMultiplication(Object receiver, Object adapter, Object vector) throws UnsupportedMessageException;
 
-    public abstract Object transpose(Object receiver) throws UnsupportedMessageException;
-    public abstract Object invertMatrix(Object receiver) throws UnsupportedMessageException;
-    public abstract Object crossProduct(Object receiver) throws UnsupportedMessageException;
-    public abstract Object crossProductDuo(Object receiver, Object another) throws UnsupportedMessageException;
+    public abstract Object transpose(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object invertMatrix(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object crossProduct(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object crossProductDuo(Object receiver, Object adapter, Object another) throws UnsupportedMessageException;
 
-    public abstract Object diagonal(Object receiver) throws UnsupportedMessageException;
+    public abstract Object diagonal(Object receiver, Object adapter) throws UnsupportedMessageException;
 
-    public abstract Object rowSum(Object receiver) throws UnsupportedMessageException;
-    public abstract Object columnSum(Object receiver) throws UnsupportedMessageException;
-    public abstract Double elementWiseSum(Object receiver) throws UnsupportedMessageException;
+    public abstract Object rowSum(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object columnSum(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Double elementWiseSum(Object receiver, Object adapter) throws UnsupportedMessageException;
 
-    public abstract Object rowWiseAppend(Object receiver, Object tensor) throws UnsupportedMessageException;
-    public abstract Object columnWiseAppend(Object receiver, Object tensor) throws UnsupportedMessageException;
+    public abstract Object rowWiseAppend(Object receiver, Object adapter, Object tensor) throws UnsupportedMessageException;
+    public abstract Object columnWiseAppend(Object receiver, Object adapter, Object tensor) throws UnsupportedMessageException;
 
-    public abstract Object splice(Object receiver, Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd) throws UnsupportedMessageException;
-    public abstract Object matrixAddition(Object receiver, Object otherMatrix) throws UnsupportedMessageException;
-    public abstract Integer getNumRows(Object receiver) throws UnsupportedMessageException;
-    public abstract Integer getNumCols(Object receiver) throws UnsupportedMessageException;
-    public abstract Object removeAbstractions(Object receiver) throws UnsupportedMessageException;
-    public abstract Object unwrap(Object receiver);
+    public abstract Object splice(Object receiver, Object adapter, Integer rowStart, Integer rowEnd, Integer colStart, Integer colEnd) throws UnsupportedMessageException;
+    public abstract Object matrixAddition(Object receiver, Object adapter, Object otherMatrix) throws UnsupportedMessageException;
+    public abstract Integer getNumRows(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Integer getNumCols(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object removeAbstractions(Object receiver, Object adapter) throws UnsupportedMessageException;
+    public abstract Object unwrap(Object receiver, Object adapter);
 
 }
