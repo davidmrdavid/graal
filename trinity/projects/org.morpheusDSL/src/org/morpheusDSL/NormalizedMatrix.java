@@ -94,7 +94,6 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(guards = {"member.equals(build)", "arguments.length == 5"})
         static Object doBuild(NormalizedMatrix receiver, String member, Object[] arguments, @Cached BuildNode node) throws UnsupportedMessageException {
-            System.out.println("JAVA - In doBuild");
             return node.execute(receiver, arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
         }
 
@@ -111,13 +110,11 @@ public final class NormalizedMatrix implements TruffleObject {
         //add
         @Specialization(guards = {"member.equals(scalarAddition)", "arguments.length == 1"})
         static Object doScalarAddition(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
-            System.out.println("JAVA - In doScalarAddition");
             return node.execute(receiver, arguments[0]);
         }
 
         @Specialization(guards = {"member.equals(scalarMultiplication)", "arguments.length == 1"})
         static Object doScalarMultiplication(NormalizedMatrix receiver, String member, Object[] arguments, @Cached ScalarMultiplicationNode node) throws UnsupportedMessageException {
-            System.out.println("JAVA - In doScalarMultiplication");
             return node.execute(receiver, arguments[0]);
         }
 
@@ -168,7 +165,6 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization
         static Object doDefault(NormalizedMatrix receiver, String member, Object[] arguments) {
-            System.out.println("JAVA - In the doDefault");
             //TODO: throw exception here.
             return -1;
         }
@@ -189,7 +185,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 //TODO: casting to int is unsafe here! this returns longs
                 int sizeKs = (int) interop.getArraySize(Ks);
                 int sizeRs = (int) interop.getArraySize(Rs);
-		boolean SemptyBool = (boolean) interop.asBoolean(Sempty);
+		        boolean SemptyBool = (boolean) interop.asBoolean(Sempty);
 
                 receiver.Ks = new Object[sizeKs]; 
                 receiver.Rs = new Object[sizeKs];
@@ -202,10 +198,10 @@ public final class NormalizedMatrix implements TruffleObject {
                     receiver.Ks[i] = currK;
                     receiver.Rs[i] = currR;
                 }
-	        receiver.Sempty = SemptyBool;
+	            receiver.Sempty = SemptyBool;
                 receiver.adapter = new MatrixAdapter(adapter);
 
-            System.out.println("JAVA - In BuildNode");
+            
             }
 
             catch (Exception e) {
@@ -225,8 +221,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object executeDefault(NormalizedMatrix receiver,
-                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                              @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
+                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                              ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -239,8 +235,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object executeDefaultSempty(NormalizedMatrix receiver,
-                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                              @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
+                              @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                              ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -258,8 +254,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -272,8 +268,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen ) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -291,26 +287,26 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
-            System.out.println("JAVA - In ScalarAddition Node");
+            
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
             for(int i = 0; i < size; i++) {
                 newRs[i] = matrixlibS.scalarAddition(receiver.adapter, receiver.Rs[i], scalar);
             } 
-            //System.out.println("JAVA - Finish scalarAddition call");
+            
             Object newS = matrixlibS.scalarAddition(receiver.adapter, receiver.S, scalar);
-            System.out.println("JAVA - Finish scalarAddition call");
+            
 
             return createCopy(newS, receiver.Ks, newRs, receiver.T, receiver.Sempty, receiver.adapter);
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -328,8 +324,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -342,8 +338,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -362,8 +358,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -378,8 +374,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver, Object scalar,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             int size = receiver.Rs.length;
             Object[] newRs = new Object[size];
@@ -401,8 +397,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T","!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver, Object matrix,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
             Integer start = new Integer(0);                   //TODO: cache this?
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
             Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
@@ -433,23 +429,19 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver, Object matrix,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
-            System.out.println("JAVA - in LMM 2");
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
+            
             Integer start = new Integer(0);                   //TODO: cache this?
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
-            System.out.println("JAVA - in LMM 2 -- STEP 1");
+            
             Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
-            Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
-
-
-            System.out.println("JAVA - in LMM 2 -- STEP 2");
+            Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x           
             Integer d_prime_prev = start;
             Integer d_prime = matrixlibS.getNumCols(receiver.adapter, receiver.Rs[0]);
 
@@ -473,8 +465,8 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            
+            return result;
         }
 
         @Specialization(limit = "3", guards = "receiver.T")
@@ -484,14 +476,14 @@ public final class NormalizedMatrix implements TruffleObject {
 
             //Object vectorAdapter = new MatrixAdapter(vector);
             Object vectorT = matrixlibS.transpose(receiver.adapter, vector);
-            Object vectorTUnwrapped = matrixlibS.unwrap(receiver.adapter, vectorT);
+            Object vectorTUnwrapped = vectorT;
             receiver.T = !receiver.T;
             Object rmm = node.execute(receiver, vectorTUnwrapped);
             receiver.T = !receiver.T;
             //Object rmmAdapted = new MatrixAdapter(rmm);
             Object rmmAdaptedT = matrixlibS.transpose(receiver.adapter, rmm);
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, rmmAdaptedT);
-            return resultUnwrapped;
+            
+            return rmmAdaptedT;
         }
 
 
@@ -505,8 +497,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver, Object vector,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
             Object leftmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.S, vector);
             Object result = leftmostColumns;
@@ -518,14 +510,14 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+           
+            return result;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver, Object vector,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
 
             Object vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[0], vector);
@@ -538,8 +530,8 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            
+            return result;
         }
 
         @Specialization(limit = "3", guards = "receiver.T")
@@ -548,14 +540,13 @@ public final class NormalizedMatrix implements TruffleObject {
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
             Object vectorT = matrixlibGen.transpose(receiver.adapter, vector);
-            Object vectorTUnwrapped = matrixlibGen.unwrap(receiver.adapter, vectorT);
+            Object vectorTUnwrapped = vectorT;
             receiver.T = !receiver.T;
             Object lmm = node123.execute(receiver, vectorTUnwrapped);
             receiver.T = !receiver.T;
             //Object lmmAdapted = new MatrixAdapter(lmm);
             Object lmmAdaptedT = matrixlibGen.transpose(receiver.adapter, lmm);
-            Object resultUnwrapped = matrixlibGen.unwrap(receiver.adapter, lmmAdaptedT);
-            return resultUnwrapped;
+            return lmmAdaptedT;
 
         }
 
@@ -611,8 +602,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
             Object crossProdS = matrixlibS.crossProduct(receiver.adapter, receiver.S); 
@@ -660,14 +651,13 @@ public final class NormalizedMatrix implements TruffleObject {
                 result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
 
             }
-	    Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
             }
 
         @Specialization(limit = "3", guards = {"!receiver.T", "receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
 
 
@@ -710,15 +700,15 @@ public final class NormalizedMatrix implements TruffleObject {
                 result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
 
             }
-	    Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+	    
+            return result;
 
        }
 
         @Specialization(limit = "3", guards = "receiver.T")
         Object doTransposed(NormalizedMatrix receiver,
-                            @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                            @CachedLibrary(limit = "4") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                            @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                            ) throws UnsupportedMessageException {
             //Compute the Gram matrix
             Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
             Object crossProdSTrans = matrixlibS.crossProduct(receiver.adapter, sTransposed);
@@ -741,8 +731,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T","!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             Object rowSumS = matrixlibS.rowSum(receiver.adapter, receiver.S);
             Object tempo = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
@@ -755,14 +745,13 @@ public final class NormalizedMatrix implements TruffleObject {
                 currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T", "receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             Object rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
             Object currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], rowSumR);
@@ -774,8 +763,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "1", guards = "receiver.T")
@@ -787,8 +775,7 @@ public final class NormalizedMatrix implements TruffleObject {
             receiver.T = !receiver.T;
             //Object rowSumAdapter = new MatrixAdapter(rowSum);
             Object rowSumT = matrixlibS.transpose(receiver.adapter, rowSum);
-            Object result = matrixlibS.unwrap(receiver.adapter, rowSumT);
-            return result;
+            return rowSumT;
 
         }
 
@@ -801,8 +788,8 @@ public final class NormalizedMatrix implements TruffleObject {
 
         @Specialization(limit = "3", guards = {"!receiver.T", "!receiver.Sempty"})
         Object doDefault(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
             Object columnSumS = matrixlibS.columnSum(receiver.adapter, receiver.S);
             Object result = columnSumS;
             Object columnSumK = null;
@@ -813,14 +800,13 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "3", guards = {"!receiver.T","receiver.Sempty"})
         Object doDefaultSempty(NormalizedMatrix receiver,
-                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "3") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
+                         ) throws UnsupportedMessageException {
 
             Object columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
             Object rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], columnSumK);
@@ -832,8 +818,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "1", guards = "receiver.T")
@@ -846,8 +831,7 @@ public final class NormalizedMatrix implements TruffleObject {
             receiver.T = !receiver.T;
             //Object rowSumAdapter = new MatrixAdapter(rowSum);
             Object rowSumT = matrixlibS.transpose(receiver.adapter, rowSum);
-            Object result = matrixlibS.unwrap(receiver.adapter, rowSumT);
-            return result;
+            return rowSumT;
         }
     }
 
@@ -860,8 +844,8 @@ public final class NormalizedMatrix implements TruffleObject {
         @Specialization(limit = "3", guards="!receiver.Sempty")
         Object doDefault(NormalizedMatrix receiver,
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") InteropLibrary interop,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary(limit = "10") InteropLibrary interop
+                         ) throws UnsupportedMessageException {
 
             Double elementWiseSumS = matrixlibS.elementWiseSum(receiver.adapter, receiver.S);
             Object columnWiseSumK = null;
@@ -884,15 +868,14 @@ public final class NormalizedMatrix implements TruffleObject {
                     result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
 
         @Specialization(limit = "3", guards="receiver.Sempty")
         Object doDefaultSempty(NormalizedMatrix receiver,
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS,
-                         @CachedLibrary(limit = "10") InteropLibrary interop,
-                         @CachedLibrary(limit = "10") MatrixLibrary matrixlibGen) throws UnsupportedMessageException {
+                         @CachedLibrary(limit = "10") InteropLibrary interop
+                         ) throws UnsupportedMessageException {
 
             Double elementWiseSumS = new Double(0);
             Object columnWiseSumK = null;
@@ -915,8 +898,7 @@ public final class NormalizedMatrix implements TruffleObject {
                     result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }
-            Object resultUnwrapped = matrixlibS.unwrap(receiver.adapter, result);
-            return resultUnwrapped;
+            return result;
         }
     }
 
@@ -988,7 +970,6 @@ public final class NormalizedMatrix implements TruffleObject {
 
     @ExportMessage
     Object scalarAddition(Object adapter, Object scalar, @Cached ScalarAdditionNode node) throws UnsupportedMessageException {
-        System.out.println("JAVA - IN scalarAddition Export Message");
         return node.execute(this, scalar);
     }
 
