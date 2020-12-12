@@ -401,8 +401,8 @@ public final class NormalizedMatrix implements TruffleObject {
                          ) throws UnsupportedMessageException {
             Integer start = new Integer(0);                   //TODO: cache this?
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
-            Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
-            Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
+            //Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
+            //Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
             Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
 
 
@@ -440,7 +440,7 @@ public final class NormalizedMatrix implements TruffleObject {
             Integer start = new Integer(0);                   //TODO: cache this?
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
             
-            Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
+            //Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
             Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x           
             Integer d_prime_prev = start;
             Integer d_prime = matrixlibS.getNumCols(receiver.adapter, receiver.Rs[0]);
@@ -605,7 +605,7 @@ public final class NormalizedMatrix implements TruffleObject {
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
                          ) throws UnsupportedMessageException {
 
-            Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
+            //Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
             Object crossProdS = matrixlibS.crossProduct(receiver.adapter, receiver.S); 
 
             Object Y2I = null;
@@ -735,7 +735,7 @@ public final class NormalizedMatrix implements TruffleObject {
                          ) throws UnsupportedMessageException {
 
             Object rowSumS = matrixlibS.rowSum(receiver.adapter, receiver.S);
-            Object tempo = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
+            //Object tempo = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
             Object rowSumR = null; 
             Object currProd = null;
             Object result = rowSumS;
