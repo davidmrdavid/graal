@@ -403,15 +403,20 @@ public final class NormalizedMatrix implements TruffleObject {
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
             //Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
             //Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
+            Long startTime = System.currentTimeMillis();
             Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
 
 
             Integer sNumCols = matrixlibS.getNumCols(receiver.adapter, receiver.S);
+            
             Object firstSplice = matrixlibS.splice(receiver.adapter, matrix, start, sNumCols - 1, start, matrixNumCols - 1);
-
+           
             Object leftSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.S, firstSplice);
+            Long endTime = System.currentTimeMillis();
+            Long elapsedTime = (endTime - startTime);
+            System.out.println("Out1: " + elapsedTime);
 
-
+            
             Object result = leftSummand;
             Object rightSummandInnerProd = null;
             Object rightSummand = null;
@@ -420,14 +425,29 @@ public final class NormalizedMatrix implements TruffleObject {
             Integer d_prime = sNumCols;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i ++) {
+                System.out.println("Loop #" + (i+1));
+                startTime = System.currentTimeMillis();
                 d_prime += matrixlibS.getNumCols(receiver.adapter, receiver.Rs[i]);
 
                 secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
                 rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
+                endTime = System.currentTimeMillis();
+                elapsedTime = (endTime - startTime);
+                System.out.println("MUL R: " + elapsedTime);
+                
+                startTime = System.currentTimeMillis();
                 rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
-                result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
+                endTime = System.currentTimeMillis();
+                elapsedTime = (endTime - startTime);
+                System.out.println("MUL K: " + elapsedTime);
+                
+                startTime = System.currentTimeMillis();
+                result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);
+                endTime = System.currentTimeMillis();
+                elapsedTime = (endTime - startTime);
+                System.out.println("Add: " + elapsedTime);
             }
             return result;
         }
@@ -607,119 +627,47 @@ public final class NormalizedMatrix implements TruffleObject {
 
             //Object sTransposed = matrixlibS.transpose(receiver.adapter, receiver.S);
             
-            Long startTime = System.currentTimeMillis();
+            
             Object crossProdS = matrixlibS.crossProduct(receiver.adapter, receiver.S); 
-            Long endTime = System.currentTimeMillis();
-            Long elapsedTime = (endTime - startTime);
-            System.out.println("CrossProdS: " + elapsedTime);
                           
             Object Y2I = null;
             Object Y2ICol = null;
-            
-            startTime = System.currentTimeMillis();
-            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[0], receiver.S);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("Y2I 1: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
-            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[0], Y2I);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("Y2I 2: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
+ 
+            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[0], receiver.S);         
+            Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[0], Y2I);         
+
             Object Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("TRANS: " + elapsedTime);
-
-
-            Object diagElem = null;
-            
-            startTime = System.currentTimeMillis();
+            Object diagElem = null;                       
             diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("COLSUMS: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
-            diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("SQRT: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
-            diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("DIAG: " + elapsedTime);
-            
-            
-            
-            startTime = System.currentTimeMillis();
-            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("RMM: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
+            diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);            
+            diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);            
+            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);            
             diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("CROSSPROD: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
-            Object resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, crossProdS, Y2ITrans);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("CWA 1: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
+                        
+            Object resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, crossProdS, Y2ITrans);       
             Object resultRow2 = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, diagElem);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("CWA 2: " + elapsedTime);
-            
-            startTime = System.currentTimeMillis();
+           
             Object result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
-            endTime = System.currentTimeMillis();
-            elapsedTime = (endTime - startTime);
-            System.out.println("RWA: " + elapsedTime);
+            
 
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++) {
-                System.out.println("LOOP NUM : " + i);
-                startTime = System.currentTimeMillis();
-                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[i], receiver.S);
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("FOR LOOP Y2I 1: " + elapsedTime);
                 
-                startTime = System.currentTimeMillis();
+                Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[i], receiver.S); 
                 Y2I = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2I);
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("FOR LOOP Y2I 1: " + elapsedTime);
-                
-                for(int j = 0; j < i; j++) {
-                    startTime = System.currentTimeMillis();
+               
+                for(int j = 0; j < i; j++) {                    
                     Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Ks[j], receiver.Ks[i]);
                     Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, Y2ICol, receiver.Rs[j]);
                     Y2ICol = matrixlibS.crossProductDuo(receiver.adapter, receiver.Rs[i], Y2ICol);
-                    Y2I = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, Y2ICol);
-                    endTime = System.currentTimeMillis();
-                    elapsedTime = (endTime - startTime);
-                    System.out.println("FOR LOOP CROSS PROD R*R TOTAL: " + elapsedTime);
+                    Y2I = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, Y2ICol);                    
                 }
-                startTime = System.currentTimeMillis();
+                
                 diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
                 diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
                 diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
                 diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
                 diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
-                
-
 
                 Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
 
@@ -727,9 +675,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 resultRow2 = matrixlibS.columnWiseAppend(receiver.adapter, Y2I, diagElem);
                 result = matrixlibS.rowWiseAppend(receiver.adapter, resultRow1, resultRow2);
                 
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("FOR LOOP S*R TOTAL: " + elapsedTime);
+                
 
             }
             return result;
