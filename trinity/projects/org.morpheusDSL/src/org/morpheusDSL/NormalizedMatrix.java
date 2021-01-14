@@ -403,19 +403,14 @@ public final class NormalizedMatrix implements TruffleObject {
             //Object adaptedMatrix = new MatrixAdapter(matrix); //TODO: cache this?
             //Integer sNumRows = matrixlibS.getNumRows(receiver.adapter, receiver.S);            // n_s
             //Integer matrixNumRows = matrixlibS.getNumRows(receiver.adapter, matrix);  // n_x (alternatively d in section 3.3.3)
-            Long startTime = System.currentTimeMillis();
+            
             Integer matrixNumCols = matrixlibS.getNumCols(receiver.adapter, matrix);  // d_x
-
-
             Integer sNumCols = matrixlibS.getNumCols(receiver.adapter, receiver.S);
             
             Object firstSplice = matrixlibS.splice(receiver.adapter, matrix, start, sNumCols - 1, start, matrixNumCols - 1);
            
             Object leftSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.S, firstSplice);
-            Long endTime = System.currentTimeMillis();
-            Long elapsedTime = (endTime - startTime);
-            System.out.println("Out1: " + elapsedTime);
-
+            
             
             Object result = leftSummand;
             Object rightSummandInnerProd = null;
@@ -425,29 +420,18 @@ public final class NormalizedMatrix implements TruffleObject {
             Integer d_prime = sNumCols;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i ++) {
-                System.out.println("Loop #" + (i+1));
-                startTime = System.currentTimeMillis();
+                
                 d_prime += matrixlibS.getNumCols(receiver.adapter, receiver.Rs[i]);
 
                 secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
                 rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("MUL R: " + elapsedTime);
-                
-                startTime = System.currentTimeMillis();
+            
                 rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("MUL K: " + elapsedTime);
-                
-                startTime = System.currentTimeMillis();
+        
                 result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);
-                endTime = System.currentTimeMillis();
-                elapsedTime = (endTime - startTime);
-                System.out.println("Add: " + elapsedTime);
+                
             }
             return result;
         }
@@ -520,6 +504,7 @@ public final class NormalizedMatrix implements TruffleObject {
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
                          ) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
+            System.out.println("GOOOO");
             Object leftmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.S, vector);
             Object result = leftmostColumns;
             Object vecByK = null;
