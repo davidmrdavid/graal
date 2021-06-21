@@ -409,7 +409,7 @@ public final class NormalizedMatrix implements TruffleObject {
             
             Object firstSplice = matrixlibS.splice(receiver.adapter, matrix, start, sNumCols - 1, start, matrixNumCols - 1);
            
-            Object leftSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.S, firstSplice);
+            Object leftSummand = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.S, firstSplice);
             
             
             Object result = leftSummand;
@@ -426,9 +426,9 @@ public final class NormalizedMatrix implements TruffleObject {
                 secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
-                rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
+                rightSummandInnerProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
             
-                rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
+                rightSummand = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
         
                 result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);
                 
@@ -453,8 +453,8 @@ public final class NormalizedMatrix implements TruffleObject {
             Object secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
             d_prime_prev = d_prime;
 
-            Object rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[0], secondSplice);
-            Object rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], rightSummandInnerProd);
+            Object rightSummandInnerProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], secondSplice);
+            Object rightSummand = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[0], rightSummandInnerProd);
 
 
             Object result = rightSummand;
@@ -465,8 +465,8 @@ public final class NormalizedMatrix implements TruffleObject {
                 secondSplice = matrixlibS.splice(receiver.adapter, matrix, d_prime_prev, d_prime - 1, start, matrixNumCols - 1);
                 d_prime_prev = d_prime;
 
-                rightSummandInnerProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
-                rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
+                rightSummandInnerProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], secondSplice);
+                rightSummand = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], rightSummandInnerProd);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, rightSummand);              
             }
             
@@ -504,15 +504,14 @@ public final class NormalizedMatrix implements TruffleObject {
                          @CachedLibrary("receiver.adapter") MatrixLibrary matrixlibS
                          ) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
-            System.out.println("GOOOO");
-            Object leftmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.S, vector);
+            Object leftmostColumns = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.S, vector);
             Object result = leftmostColumns;
             Object vecByK = null;
             Object rightmostColumns = null;
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i++) {
-                vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
-                rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
+                vecByK = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
+                rightmostColumns = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
            
@@ -525,14 +524,14 @@ public final class NormalizedMatrix implements TruffleObject {
                          ) throws UnsupportedMessageException {
             //Object vectorAdapter = new MatrixAdapter(vector);
 
-            Object vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[0], vector);
-            Object rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], vecByK);
+            Object vecByK = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], vector);
+            Object rightmostColumns = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[0], vecByK);
 
             Object result = rightmostColumns;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i++) {
-                vecByK = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
-                rightmostColumns = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
+                vecByK = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], vector);
+                rightmostColumns = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], vecByK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightmostColumns);
             }
             
@@ -626,7 +625,7 @@ public final class NormalizedMatrix implements TruffleObject {
             diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
             diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);            
             diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);            
-            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);            
+            diagElem = matrixlibS.leftMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);            
             diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
                         
             Object resultRow1 = matrixlibS.columnWiseAppend(receiver.adapter, crossProdS, Y2ITrans);       
@@ -651,7 +650,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
                 diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
                 diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
-                diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
+                diagElem = matrixlibS.leftMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
                 diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
 
                 Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
@@ -682,7 +681,7 @@ public final class NormalizedMatrix implements TruffleObject {
             diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
             diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
             diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
-            diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);
+            diagElem = matrixlibS.leftMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[0]);
             diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
             Object resultRow1 = null;
 
@@ -703,7 +702,7 @@ public final class NormalizedMatrix implements TruffleObject {
                 diagElem = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
                 diagElem = matrixlibS.elementWiseSqrt(receiver.adapter, diagElem);
                 diagElem = matrixlibS.diagonal(receiver.adapter, diagElem);
-                diagElem = matrixlibS.rightMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
+                diagElem = matrixlibS.leftMatrixMultiplication(receiver.adapter, diagElem, receiver.Rs[i]);
                 diagElem = matrixlibS.crossProduct(receiver.adapter, diagElem);
 
                 Y2ITrans = matrixlibS.transpose(receiver.adapter, Y2I);
@@ -727,9 +726,9 @@ public final class NormalizedMatrix implements TruffleObject {
 
             Object rTransposed = matrixlibS.transpose(receiver.adapter, receiver.R);
             Object crossProdRTrans = matrixlibS.crossProduct(receiver.adapter, rTransposed);
-            Object kByCrossProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.K, crossProdRTrans);
+            Object kByCrossProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.K, crossProdRTrans);
             Object kTransposed = matrixlibS.transpose(receiver.adapter, receiver.K);
-            Object rightSummand = matrixlibS.rightMatrixMultiplication(receiver.adapter, kByCrossProd, kTransposed);
+            Object rightSummand = matrixlibS.leftMatrixMultiplication(receiver.adapter, kByCrossProd, kTransposed);
 
             Object result = matrixlibS.matrixAddition(receiver.adapter, crossProdSTrans, rightSummand);
             return result;
@@ -754,7 +753,7 @@ public final class NormalizedMatrix implements TruffleObject {
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i ++){
                 rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
-                currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
+                currProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
             return result;
@@ -766,13 +765,13 @@ public final class NormalizedMatrix implements TruffleObject {
                          ) throws UnsupportedMessageException {
 
             Object rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
-            Object currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[0], rowSumR);
+            Object currProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[0], rowSumR);
             Object rowSumS = currProd;
             Object result = rowSumS;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i ++){
                 rowSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
-                currProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
+                currProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Ks[i], rowSumR);
                 result = matrixlibS.matrixAddition(receiver.adapter, result, currProd);
             }
             return result;
@@ -809,7 +808,7 @@ public final class NormalizedMatrix implements TruffleObject {
             int size = receiver.Rs.length;
             for(int i = 0; i < size; i++) {
                 columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
-                rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
+                rightCols = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
             return result;
@@ -821,13 +820,13 @@ public final class NormalizedMatrix implements TruffleObject {
                          ) throws UnsupportedMessageException {
 
             Object columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
-            Object rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[0], columnSumK);
+            Object rightCols = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[0], columnSumK);
 
             Object result = rightCols;
             int size = receiver.Rs.length;
             for(int i = 1; i < size; i++) {
                 columnSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
-                rightCols = matrixlibS.leftMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
+                rightCols = matrixlibS.rightMatrixMultiplication(receiver.adapter, receiver.Rs[i], columnSumK);
                 result = matrixlibS.columnWiseAppend(receiver.adapter, result, rightCols);
             }
             return result;
@@ -870,13 +869,13 @@ public final class NormalizedMatrix implements TruffleObject {
             if( size > 0 ){
                 columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
                 rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
-                currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                currentProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
                 result = matrixlibS.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
                     columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
                     rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
-                    currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                    currentProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
                     result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }
@@ -900,13 +899,13 @@ public final class NormalizedMatrix implements TruffleObject {
             if( size > 0 ){
                 columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[0]);
                 rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[0]);
-                currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                currentProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
                 result = matrixlibS.scalarAddition(receiver.adapter, currentProd ,elementWiseSumS);
             
                 for(int i = 1; i < size; i++) {
                     columnWiseSumK = matrixlibS.columnSum(receiver.adapter, receiver.Ks[i]);
                     rowWiseSumR = matrixlibS.rowSum(receiver.adapter, receiver.Rs[i]);
-                    currentProd = matrixlibS.rightMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
+                    currentProd = matrixlibS.leftMatrixMultiplication(receiver.adapter, columnWiseSumK, rowWiseSumR);
                     result = matrixlibS.matrixAddition(receiver.adapter, result, currentProd);
                 }
             }

@@ -192,15 +192,15 @@ public class MatrixAdapter implements TruffleObject {
     }
 
     @ExportMessage
-    public Object leftMatrixMultiplication(Object adapter, Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
-        Object[] arguments = {adapter, vector};
-        return doCallObj("leftMatrixMultiplication", arguments, interop);
-    }
-
-    @ExportMessage
     public Object rightMatrixMultiplication(Object adapter, Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
         Object[] arguments = {adapter, vector};
         return doCallObj("rightMatrixMultiplication", arguments, interop);
+    }
+
+    @ExportMessage
+    public Object leftMatrixMultiplication(Object adapter, Object vector, @CachedLibrary(limit = "3") InteropLibrary interop, @CachedLibrary(limit = "10") MatrixLibrary tensorlib) throws UnsupportedMessageException {
+        Object[] arguments = {adapter, vector};
+        return doCallObj("leftMatrixMultiplication", arguments, interop);
     }
 
     //TODO: Setting `limit= "3"` in here breaks LogReg. Why?
